@@ -94,6 +94,19 @@ export const registerSchema = z.object({
   body: z.discriminatedUnion("role", [employerBody, candidateBody]),
 });
 
+export const loginSchema = z.object({
+  body: z.object({
+    email: z
+      .string({ error: "Email is required" })
+      .trim()
+      .toLowerCase()
+      .email("Invalid email address"),
+    password: z
+      .string({ error: "Password is required" })
+      .min(6, "Password must be at least 6 characters"),
+  }),
+});
+
 export const refreshTokenSchema = z.object({
   cookies: z.object({
     refreshToken: z
