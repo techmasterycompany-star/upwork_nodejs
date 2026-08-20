@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import User from "../../models/user.model.js";
+import User, { IUser } from "../../models/user.model.js";
 import Session from "../../models/session.model.js";
 
 import AppError from "../../error/AppError.js";
@@ -10,6 +10,7 @@ import {
 } from "../../utils/jwt.js";
 import { dummyHash, TOKEN_EXPIRATION } from "./auth.constants.js";
 import type { RegisterInput } from "./auth.validation.js";
+import { HydratedDocument } from "mongoose";
 
 const register = async ({ data }: { data: RegisterInput }) => {
   const hashedPassword = await bcrypt.hash(data.password, 12);
@@ -22,28 +23,12 @@ const register = async ({ data }: { data: RegisterInput }) => {
     is_blocked: false,
   };
 
-
   if (data.role === "employer") {
-    userData.employerProfile = {
-      company_name: "New Company", 
-      company_logo: "",
-      description: "",
-      industry: "",
-      website: "",
-    };
+    userData.employerProfile = data.employerProfile;
   }
 
-
   if (data.role === "candidate") {
-    userData.candidateProfile = {
-      headline: "",
-      bio: "",
-      location: "",
-      portfolio_url: "",
-      resume: "",
-      skills: [],
-      experience_level: "entry",
-    };
+    userData.candidateProfile = data.candidateProfile;
   }
 
   try {
@@ -146,6 +131,7 @@ const refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
     accessToken: generateAccessToken({
       userId: user._id.toString(),
       role: user.role,
+      sessionId: session._id.toString(),
     }),
     accessTokenExpiresIn: TOKEN_EXPIRATION.access_token / 1000,
     refreshToken: rawToken,
@@ -157,6 +143,17 @@ const refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
       profile:
         user.role === "employer" ? user.employerProfile : user.candidateProfile,
     },
+  };
+};
+
+export const me = ({ user }: { user: HydratedDocument<IUser> }) => {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    profile:
+      user.role === "employer" ? user.employerProfile : user.candidateProfile,
   };
 };
 

@@ -1,14 +1,48 @@
 import { z } from "zod";
-import mongoose from "mongoose";
+import { objectIdSchema } from "../../utils/validation.utils.js";
+const employerProfileBody = z
+  .object({
+    company_name: z
+      .string({ error: "Company name is required" })
+      .trim()
+      .min(1, "Company name is required"),
 
-const objectId = z
-  .string()
-  .refine((id) => mongoose.Types.ObjectId.isValid(id), {
-    message: "Invalid specialty id",
-  });
+    company_logo: z.string().trim().optional(),
 
-const phoneRegex = /^(\+20|0)?1[0125][0-9]{8}$/;
+    description: z
+      .string()
+      .trim()
+      .max(2000, "Description cannot exceed 2000 characters"),
+    industry: z.string().trim(),
 
+    website: z.string().trim().optional(),
+  })
+  .strict();
+
+const candidateSkillBody = z
+  .object({
+    skill_id: objectIdSchema("skill_id"),
+  })
+  .strict();
+
+const candidateProfileBody = z
+  .object({
+    headline: z.string().trim(),
+
+    bio: z.string().trim().max(2000, "Bio cannot exceed 2000 characters"),
+    location: z.string().trim().optional(),
+
+    portfolio_url: z.string().trim().optional(),
+
+    resume: z.string(),
+
+    skills: z.array(candidateSkillBody).optional(),
+
+    experience_level: z.enum(["entry", "junior", "mid", "senior", "lead"], {
+      error: "Experience level is required",
+    }),
+  })
+  .strict();
 
 const employerBody = z
   .object({
@@ -29,10 +63,9 @@ const employerBody = z
 
     role: z.literal("employer"),
 
-
+    employerProfile: employerProfileBody,
   })
   .strict();
-
 
 const candidateBody = z
   .object({
@@ -53,47 +86,26 @@ const candidateBody = z
 
     role: z.literal("candidate"),
 
-
+    candidateProfile: candidateProfileBody,
   })
   .strict();
 
+export const registerSchema = z.object({
+  body: z.discriminatedUnion("role", [employerBody, candidateBody]),
+});
 
-const adminBody = z
-  .object({
-    name: z
-      .string({ error: "Name is required" })
-      .trim()
-      .min(3, "Name must be at least 3 characters"),
-
+export const loginSchema = z.object({
+  body: z.object({
     email: z
       .string({ error: "Email is required" })
       .trim()
       .toLowerCase()
       .email("Invalid email address"),
-
     password: z
       .string({ error: "Password is required" })
       .min(6, "Password must be at least 6 characters"),
-
-    role: z.literal("admin"),
-  })
-  .strict();
-
-
-export const registerSchema = z.object({
-  body: z.discriminatedUnion("role", [employerBody, candidateBody, adminBody]),
-});
-
-
-export const verifyEmailSchema = z.object({
-  body: z.object({
-    token: z
-      .string({ error: "Verification token is required" })
-      .min(10, "Invalid token")
-      .max(100, "Invalid token"),
   }),
 });
-
 
 export const refreshTokenSchema = z.object({
   cookies: z.object({
@@ -104,7 +116,5 @@ export const refreshTokenSchema = z.object({
   }),
 });
 
-
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
-export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["body"];
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>["cookies"];
