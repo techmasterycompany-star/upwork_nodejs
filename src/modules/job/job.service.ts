@@ -18,6 +18,11 @@ export const getAllJobs = async () => {
   return Jobs;
 };
 
+export const getAllAdminJobs = async () => {
+  const Jobs = await jobModel.find({ status: "pending_approval" });
+  return Jobs;
+};
+
 export const getemployeeJobs = async (id: Types.ObjectId) => {
   const Jobs = await jobModel.find({ employer_id: id });
   return Jobs;

@@ -2,6 +2,7 @@ import AppError from "../../error/AppError.js";
 import {
   createJob,
   deleteJobbyid,
+  getAllAdminJobs,
   getAllJobs,
   getemployeeJobs,
   updateJob,
@@ -21,6 +22,14 @@ export const createNewJob = async (req: Request, res: Response) => {
 
 export const readAllJobs = async (req: Request, res: Response) => {
   const job = await getAllJobs();
+  res.status(200).json({
+    success: true,
+    message: "get Jobs successfully",
+    data: job,
+  });
+};
+export const readAllAdminJobs = async (req: Request, res: Response) => {
+  const job = await getAllAdminJobs();
   res.status(200).json({
     success: true,
     message: "get Jobs successfully",
