@@ -1,13 +1,19 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 
 export const createJobSchema = z.object({
-  
   body: z.object({
     title: z.string().trim().min(1, "Title is required"),
     description: z.string().trim().min(1, "Description is required"),
     responsibilities: z.string().trim().min(1, "Responsibilities is required"),
     requirements: z.string().trim().min(1, "Requirements is required"),
-    category_id: z.string().min(1, "Category is required"),
+    category_id: z
+      .string()
+      .refine(
+        (id) => mongoose.Types.ObjectId.isValid(id),
+        "Invalid category ID",
+      ),
+    technologies: z.array(z.string()).optional(),
     location: z.string().trim().optional(),
     work_type: z.enum(["remote", "onsite", "hybrid"]),
     salary_min: z.number().min(0).optional(),
@@ -18,7 +24,6 @@ export const createJobSchema = z.object({
     application_deadline: z.coerce.date(),
   }),
 });
-
 
 export const jobIdSchema = z.object({
   params: z.object({
