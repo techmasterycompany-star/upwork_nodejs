@@ -14,12 +14,14 @@ import authRoutes from "./modules/auth/auth.route.js";
 import employerRouter from "./modules/employer/employer.route.js";
 import jobRouter from "./modules/job/jobRouter.js";
 import technologiesRouter from "./modules/technology/technology.router.js";
+import adminrouter from "./modules/admin/admin.route.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/employer", employerRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/technologies", technologiesRouter);
+app.use("/api/admin", adminrouter);
 
 app.use(errorHandler);
 export default app;
