@@ -11,6 +11,7 @@ import {
   reademployeeJobs,
   updateJobs,
   deleteJob,
+  closeJobs,
 } from "./job.controller.js";
 
 const jobRouter = Router();
@@ -39,6 +40,13 @@ jobRouter.patch(
   validate(jobIdSchema),
   validate(updateJobSchema),
   updateJobs,
+);
+jobRouter.patch(
+  "/close/:id",
+  authMiddleware,
+  authorize("employer"),
+  validate(jobIdSchema),
+  closeJobs,
 );
 
 jobRouter.delete(

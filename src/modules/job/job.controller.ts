@@ -1,5 +1,6 @@
 import AppError from "../../error/AppError.js";
 import {
+  closeJob,
   createJob,
   deleteJobbyid,
   getAllAdminJobs,
@@ -60,6 +61,21 @@ export const updateJobs = async (req: Request, res: Response) => {
     data: job,
   });
 };
+
+export const closeJobs = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const userId = req.user?._id;
+  if (!userId) throw new AppError("User not authenticated", 401);
+  if (!id) throw new AppError("job id not found", 401);
+  const job = await closeJob(id, userId);
+  res.status(200).json({
+    success: true,
+    message: "job closed successfully",
+    data: job,
+  });
+};
+
+
 export const deleteJob = async (req: Request, res: Response) => {
 
   const id = req.params.id as string;
