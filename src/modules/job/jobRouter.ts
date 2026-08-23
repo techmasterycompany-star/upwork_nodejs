@@ -4,7 +4,11 @@ import {
   authorize,
 } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validate.middleware.js";
-import { createJobSchema, jobIdSchema, updateJobSchema } from "./Job.Validation.js";
+import {
+  createJobSchema,
+  jobIdSchema,
+  updateJobSchema,
+} from "./Job.Validation.js";
 import {
   createNewJob,
   readAllJobs,
@@ -12,17 +16,25 @@ import {
   updateJobs,
   deleteJob,
   closeJobs,
+  readJob,
 } from "./job.controller.js";
 
 const jobRouter = Router();
 
-jobRouter.get("/", authMiddleware, authorize("employer"), readAllJobs);
+jobRouter.get("/", authMiddleware, readAllJobs);
 
 jobRouter.get(
   "/employeeJobs",
   authMiddleware,
   authorize("employer"),
   reademployeeJobs,
+);
+jobRouter.get(
+  "/:id",
+  authMiddleware,
+  authorize("employer"),
+  validate(jobIdSchema),
+  readJob,
 );
 
 jobRouter.post(
