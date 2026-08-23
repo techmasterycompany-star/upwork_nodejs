@@ -75,12 +75,10 @@ export const closeJobs = async (req: Request, res: Response) => {
   });
 };
 
-
 export const deleteJob = async (req: Request, res: Response) => {
-
   const id = req.params.id as string;
   const userId = req.user?._id;
-  
+
   if (!userId) throw new AppError("User not authenticated", 401);
   if (!id) throw new AppError("job id not found", 401);
   const job = await deleteJobbyid(id, userId);

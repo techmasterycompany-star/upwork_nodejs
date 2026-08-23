@@ -30,7 +30,12 @@ const PaymentSchema = new Schema<IPayment>(
       enum: ["paypal", "stripe"],
       required: true,
     },
-    gateway_transaction_id: { type: String, required: true },
+    gateway_transaction_id: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
     status: {
       type: String,
       enum: ["pending", "completed", "failed", "refunded"],

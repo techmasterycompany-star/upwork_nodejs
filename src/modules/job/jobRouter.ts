@@ -4,7 +4,11 @@ import {
   authorize,
 } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validate.middleware.js";
-import { createJobSchema, jobIdSchema, updateJobSchema } from "./Job.Validation.js";
+import {
+  createJobSchema,
+  jobIdSchema,
+  updateJobSchema,
+} from "./Job.Validation.js";
 import {
   createNewJob,
   readAllJobs,

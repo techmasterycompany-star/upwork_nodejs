@@ -4,6 +4,10 @@ import cookieParser from "cookie-parser";
 import errorHandler from "./utils/errorHandler.js";
 
 const app = express();
+
+import webhookRouter from "./modules/webhook/webhook.route.js";
+app.use("/api/webhooks", webhookRouter);
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -15,6 +19,7 @@ import employerRouter from "./modules/employer/employer.route.js";
 import jobRouter from "./modules/job/jobRouter.js";
 import technologiesRouter from "./modules/technology/technology.router.js";
 import adminrouter from "./modules/admin/admin.route.js";
+import subscriptionRouter from "./modules/subscription/subscription.route.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -22,6 +27,7 @@ app.use("/api/employer", employerRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/technologies", technologiesRouter);
 app.use("/api/admin", adminrouter);
+app.use("/api/subscriptions", subscriptionRouter);
 
 app.use(errorHandler);
 export default app;

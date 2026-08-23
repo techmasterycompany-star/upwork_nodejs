@@ -1,8 +1,11 @@
 import AppError from "../../error/AppError.js";
 import jobModel from "../../models/job.model.js";
 import { Types } from "mongoose";
+import { checkJobPostingQuota } from "../../utils/jobPosting.js";
 
 export const createJob = async (jobData: any, userId: Types.ObjectId) => {
+  await checkJobPostingQuota(userId.toString());
+
   const newJob = {
     ...jobData,
     employer_id: userId,

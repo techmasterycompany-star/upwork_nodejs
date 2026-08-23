@@ -10,6 +10,7 @@ export interface ISubscription {
   status: SubscriptionStatus;
   current_period_start: Date;
   current_period_end: Date;
+  stripe_subscription_id?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -39,6 +40,11 @@ const SubscriptionSchema = new Schema<ISubscription>(
     },
     current_period_start: { type: Date, required: true },
     current_period_end: { type: Date, required: true },
+    stripe_subscription_id: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
   },
   { timestamps: true, versionKey: false },
 );
