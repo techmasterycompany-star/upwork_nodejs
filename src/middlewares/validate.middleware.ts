@@ -20,7 +20,7 @@ export const validate = (schema: ZodType<any>) => {
       if (result.cookies) {
         Object.keys(req.cookies).forEach((key) => delete req.cookies[key]);
         Object.assign(req.cookies, result.cookies);
-      }
+      } (req as any).validated = result;
       next();
     } catch (error: any) {
       const message =

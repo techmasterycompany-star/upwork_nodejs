@@ -34,6 +34,7 @@ export interface IUser {
   is_blocked: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  deletedAt?: Date | null;
 }
 
 const EmployerProfileSchema = new Schema<IEmployerProfile>(
@@ -104,6 +105,7 @@ const UserSchema = new Schema<IUser>(
       },
     },
     is_blocked: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true, versionKey: false },
 );
