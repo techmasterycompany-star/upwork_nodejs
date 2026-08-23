@@ -24,7 +24,7 @@ export const getAllAdminJobs = async () => {
 };
 
 export const getemployeeJobs = async (id: Types.ObjectId) => {
-  const Jobs = await jobModel.find({ employer_id: id });
+  const Jobs = await jobModel.find({ employer_id: id, status: "approved" });
   return Jobs;
 };
 
@@ -39,6 +39,23 @@ export const updateJob = async (
       employer_id: userId,
     },
     jobData,
+    { new: true },
+  );
+
+  if (!job) {
+    throw new AppError("Job not found", 404);
+  }
+  return job;
+};
+
+export const closeJob = async (id: string, userId: Types.ObjectId) => {
+  const job = await jobModel.findOneAndUpdate(
+    {
+      _id: id,
+      employer_id: userId,
+      status: "approved",
+    },
+    { $set: { status: "closed" } },
     { new: true },
   );
 
