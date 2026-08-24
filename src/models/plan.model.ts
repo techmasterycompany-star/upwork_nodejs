@@ -8,6 +8,8 @@ export interface IPlan {
   is_featured: boolean;
   has_direct_messaging: boolean;
   has_premium_reports: boolean;
+  stripe_price_id_monthly?: string | null;
+  stripe_price_id_yearly?: string | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -21,6 +23,8 @@ const PlanSchema = new Schema<IPlan>(
     is_featured: { type: Boolean, default: false },
     has_direct_messaging: { type: Boolean, default: false },
     has_premium_reports: { type: Boolean, default: false },
+    stripe_price_id_monthly: { type: String, default: null },
+    stripe_price_id_yearly: { type: String, default: null },
   },
   { timestamps: true, versionKey: false },
 );

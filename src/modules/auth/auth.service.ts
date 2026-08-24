@@ -12,7 +12,17 @@ import { dummyHash, TOKEN_EXPIRATION } from "./auth.constants.js";
 import type { RegisterInput } from "./auth.validation.js";
 import { HydratedDocument } from "mongoose";
 
+import Plan from "../../models/plan.model.js";
+import Subscription from "../../models/subscription.model.js";
+
 const register = async ({ data }: { data: RegisterInput }) => {
+  let freePlan: any = null;
+  if (data.role === "employer") {
+    freePlan = await Plan.findOne({ name: "Free" });
+    if (!freePlan)
+      throw new AppError("Default Free Plan not configured on server", 500);
+  }
+
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   const userData: any = {
@@ -31,11 +41,37 @@ const register = async ({ data }: { data: RegisterInput }) => {
     userData.candidateProfile = data.candidateProfile;
   }
 
+  let newUser: any;
   try {
-    await User.create(userData);
+    newUser = await User.create(userData);
   } catch (error: any) {
     if (error?.code === 11000) throw new AppError("Email already exists", 409);
     throw error;
+  }
+
+  if (data.role === "employer") {
+    try {
+      const existingSub = await Subscription.findOne({
+        employer_id: newUser._id,
+      });
+      if (!existingSub) {
+        const now = new Date();
+        const currentPeriodEnd = new Date(
+          now.getTime() + 30 * 24 * 60 * 60 * 1000,
+        );
+        await Subscription.create({
+          employer_id: newUser._id,
+          plan_id: freePlan._id,
+          billing_cycle: "monthly",
+          status: "active",
+          current_period_start: now,
+          current_period_end: currentPeriodEnd,
+        });
+      }
+    } catch (subError) {
+      await User.deleteOne({ _id: newUser._id });
+      throw subError;
+    }
   }
 
   return {

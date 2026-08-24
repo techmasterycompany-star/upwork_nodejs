@@ -31,6 +31,7 @@ export interface IUser {
   role: UserRole;
   employerProfile?: IEmployerProfile;
   candidateProfile?: ICandidateProfile;
+  stripe_customer_id?: string;
   is_blocked: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -104,6 +105,7 @@ const UserSchema = new Schema<IUser>(
       },
     },
     is_blocked: { type: Boolean, default: false },
+    stripe_customer_id: { type: String, unique: true, sparse: true },
   },
   { timestamps: true, versionKey: false },
 );
