@@ -31,6 +31,24 @@ export const getemployeeJobs = async (id: Types.ObjectId) => {
   return Jobs;
 };
 
+export const readJobById = async (id: string) => {
+  const job = await jobModel.findOneAndUpdate(
+    {
+      _id: id,
+      status: "approved",
+    },
+    {
+      $inc: { views_count: 1 },
+    },
+    { new: true },
+  );
+  if (!job) {
+    throw new AppError("Job not found", 404);
+  }
+
+  return job;
+};
+
 export const updateJob = async (
   id: string,
   userId: Types.ObjectId,

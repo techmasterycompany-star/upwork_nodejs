@@ -6,6 +6,7 @@ import {
   getAllAdminJobs,
   getAllJobs,
   getemployeeJobs,
+  readJobById,
   updateJob,
 } from "./job.service.js";
 import { Request, Response } from "express";
@@ -45,6 +46,16 @@ export const reademployeeJobs = async (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: "get Jobs successfully",
+    data: job,
+  });
+};
+
+export const readJob = async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const job = await readJobById(id);
+  res.status(200).json({
+    success: true,
+    message: "get Job successfully",
     data: job,
   });
 };
