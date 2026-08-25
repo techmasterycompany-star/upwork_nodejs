@@ -26,10 +26,9 @@ import { readAllAdminJobs } from "../job/job.controller.js";
 
 const adminrouter = Router();
 
-// Apply admin authentication/authorization to all admin routes
 adminrouter.use(authMiddleware, authorize("admin"));
 
-// ==================== Job Management ====================
+//Job Management
 
 adminrouter.get(
   "/reviewjobs",
@@ -48,7 +47,7 @@ adminrouter.post(
   rejectJob,
 );
 
-// ==================== User Management ====================
+// User Management 
 
 adminrouter.get(
   "/users",
