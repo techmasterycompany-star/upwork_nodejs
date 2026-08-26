@@ -33,6 +33,7 @@ export interface IUser {
   candidateProfile?: ICandidateProfile;
   stripe_customer_id?: string;
   is_blocked: boolean;
+  deletedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -106,6 +107,7 @@ const UserSchema = new Schema<IUser>(
     },
     is_blocked: { type: Boolean, default: false },
     stripe_customer_id: { type: String, unique: true, sparse: true },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true, versionKey: false },
 );
