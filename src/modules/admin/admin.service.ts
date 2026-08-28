@@ -1,9 +1,7 @@
 import User from "../../models/user.model.js";
 import AppError from "../../error/AppError.js";
-import { accessSync } from "node:fs";
 import type { ListUsersQuery } from "./admin.validation.js";
 import jobModel from "../../models/job.model.js";
-
 
 export const approvedJob = async (id: string) => {
   const job = await jobModel.findOneAndUpdate(
@@ -11,6 +9,10 @@ export const approvedJob = async (id: string) => {
     { $set: { status: "approved" } },
     { new: true },
   );
+
+  if (!job) {
+    throw new AppError("Not Found", 404);
+  }
 
   return job;
 };
@@ -21,6 +23,10 @@ export const rejectedJob = async (id: string) => {
     { $set: { status: "rejected" } },
     { new: true },
   );
+
+  if (!job) {
+    throw new AppError("Not Found", 404);
+  }
 
   return job;
 };
@@ -117,9 +123,4 @@ const softDeleteUser = async (id: string) => {
   return true;
 };
 
-export {
-  listUsers,
-  suspendUser,
-  activateUser,
-  softDeleteUser,
-};
+export { listUsers, suspendUser, activateUser, softDeleteUser };
