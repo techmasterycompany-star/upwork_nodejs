@@ -2,6 +2,7 @@ import AppError from "../../error/AppError.js";
 import jobModel from "../../models/job.model.js";
 import { Types } from "mongoose";
 import { checkJobPostingQuota } from "../../utils/jobPosting.js";
+import { generateText } from "../../utils/ai.js";
 
 export const createJob = async (jobData: any, userId: Types.ObjectId) => {
   await checkJobPostingQuota(userId.toString());
@@ -97,4 +98,30 @@ export const deleteJobbyid = async (id: string, userId: Types.ObjectId) => {
   }
 
   return job;
+};
+
+export const generateJobDescriptionService = async (
+  title: string,
+  experienceLevel: string,
+) => {
+  const systemPrompt = `
+You are a job description assistant.
+
+Generate a professional job description based on the job title
+and experience level.
+
+Return exactly these three sections:
+Description:
+Responsibilities:
+Requirements:
+`;
+
+  const input = `
+Job Title: ${title}
+Experience Level: ${experienceLevel}
+`;
+
+  const result = await generateText(systemPrompt, input);
+
+  return result;
 };

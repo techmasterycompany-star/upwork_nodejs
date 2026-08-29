@@ -66,3 +66,11 @@ export const updateJobSchema = z.object({
     application_deadline: z.coerce.date().optional(),
   }),
 });
+
+export const generateJobDescriptionSchema = z.object({
+  body: z.object({
+    title: z.string().trim().min(1, "Title is required"),
+
+    experience_level: z.enum(["entry", "junior", "mid", "senior", "lead"]),
+  }),
+});

@@ -3,6 +3,7 @@ import {
   closeJob,
   createJob,
   deleteJobbyid,
+  generateJobDescriptionService,
   getAllAdminJobs,
   getAllJobs,
   getemployeeJobs,
@@ -97,5 +98,23 @@ export const deleteJob = async (req: Request, res: Response) => {
     success: true,
     message: "job Deleted successfully",
     data: job,
+  });
+};
+
+
+export const generateJobDescription = async (
+  req: Request,
+  res: Response,
+) => {
+  const { title, experience_level } = req.body;
+
+  const result = await generateJobDescriptionService(
+    title,
+    experience_level,
+  );
+
+  res.status(200).json({
+    success: true,
+    data: result,
   });
 };
