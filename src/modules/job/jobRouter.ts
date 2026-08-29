@@ -6,6 +6,7 @@ import {
 import { validate } from "../../middlewares/validate.middleware.js";
 import {
   createJobSchema,
+  generateJobDescriptionSchema,
   jobIdSchema,
   updateJobSchema,
 } from "./Job.Validation.js";
@@ -17,6 +18,7 @@ import {
   deleteJob,
   closeJobs,
   readJob,
+  generateJobDescription,
 } from "./job.controller.js";
 
 const jobRouter = Router();
@@ -67,5 +69,15 @@ jobRouter.delete(
   authorize("employer"),
   deleteJob,
 );
+
+
+jobRouter.post(
+  "/generate-description",
+  authMiddleware,
+  authorize("employer"),
+  validate(generateJobDescriptionSchema),
+  generateJobDescription,
+);
+
 
 export default jobRouter;
