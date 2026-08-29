@@ -5,9 +5,11 @@ import Payment from "../../models/payment.model.js";
 import AppError from "../../error/AppError.js";
 import { retrieveSubscription } from "../../utils/stripe.js";
 import Stripe from "stripe";
+import { notify } from "../notification/notification.service.js";
 import {
   getOrCreateLocalSubscription,
   parseStripeDate,
+  notifySubscriptionChange,
 } from "./webhook.utils.js";
 
 export const processInvoicePaid = async (
@@ -55,11 +57,20 @@ export const processInvoicePaid = async (
       404,
     );
 
+  const subscriptionExists = await Subscription.findOne({
+    stripe_subscription_id: stripeSubscription,
+  });
+  const isNewPaidSub = !subscriptionExists;
+
   const subscription = await getOrCreateLocalSubscription(
     stripeSub,
     stripeSubscription,
     user._id.toString(),
   );
+
+  const oldPlanId = subscription.plan_id;
+  const oldBillingCycle = subscription.billing_cycle;
+  const oldStatus = subscription.status;
 
   subscription.plan_id = plan._id as any;
   subscription.billing_cycle = billingCycle as "monthly" | "yearly";
@@ -74,6 +85,15 @@ export const processInvoicePaid = async (
   );
 
   await subscription.save();
+
+  await notifySubscriptionChange({
+    userId: user._id,
+    isNewPaidSub,
+    oldPlanId,
+    newPlanName: plan.name,
+    billingCycle,
+    oldBillingCycle,
+  });
 
   let payment = await Payment.findOne({ gateway_transaction_id: invoiceId });
   if (payment) {
@@ -157,6 +177,17 @@ export const processInvoicePaymentFailed = async (
     } catch (paymentDbError: any) {
       if (paymentDbError?.code !== 11000) throw paymentDbError;
     }
+  }
+
+  try {
+    await notify({
+      userId: user._id,
+      type: "payment_failed",
+      title: "Subscription Payment Failed",
+      content: `Your subscription payment of ${(amountDue / 100).toFixed(2)} ${currency.toUpperCase()} failed. Please update your billing information to avoid service interruption.`,
+    });
+  } catch (notifyErr) {
+    console.error("Failed to send payment failure notification:", notifyErr);
   }
 };
 
@@ -258,6 +289,10 @@ export const processSubscriptionUpdated = async (
   if (stripeStatus === "canceled") localStatus = "canceled";
   else if (stripeStatus === "incomplete_expired") localStatus = "expired";
 
+  const oldPlanId = subscription.plan_id;
+  const oldBillingCycle = subscription.billing_cycle;
+  const oldStatus = subscription.status;
+
   subscription.plan_id = plan._id as any;
   subscription.billing_cycle = billingCycle;
   subscription.status = localStatus;
@@ -270,6 +305,69 @@ export const processSubscriptionUpdated = async (
   );
 
   await subscription.save();
+
+  try {
+    let notifyTitle = "";
+    let notifyContent = "";
+    let notifyType: "subscription_updated" | "payment_completed" =
+      "subscription_updated";
+
+    const previousAttrs = event.data.previous_attributes as any;
+
+    if (
+      stripeSub.cancel_at_period_end &&
+      previousAttrs &&
+      previousAttrs.cancel_at_period_end === false
+    ) {
+      notifyTitle = "Subscription Cancellation Scheduled";
+      notifyContent = `Your subscription cancellation has been scheduled. You will continue to have access to "${plan.name}" features until ${new Date(stripeSub.current_period_end * 1000).toLocaleDateString()}.`;
+    } else if (
+      !stripeSub.cancel_at_period_end &&
+      previousAttrs &&
+      previousAttrs.cancel_at_period_end === true
+    ) {
+      notifyTitle = "Subscription Reactivated";
+      notifyContent = `Your subscription to "${plan.name}" has been successfully reactivated.`;
+    } else if (
+      localStatus !== oldStatus &&
+      (localStatus === "canceled" || localStatus === "expired")
+    ) {
+      notifyTitle = `Subscription ${localStatus === "canceled" ? "Canceled" : "Expired"}`;
+      notifyContent = `Your subscription to "${plan.name}" has ${localStatus === "canceled" ? "canceled" : "expired"}. Your account has been reverted to the Free plan.`;
+    } else if (oldPlanId && oldPlanId.toString() !== plan._id.toString()) {
+      await notifySubscriptionChange({
+        userId: subscription.employer_id,
+        isNewPaidSub: false,
+        oldPlanId,
+        newPlanName: plan.name,
+        billingCycle,
+        oldBillingCycle,
+      });
+    } else if (oldBillingCycle !== billingCycle) {
+      await notifySubscriptionChange({
+        userId: subscription.employer_id,
+        isNewPaidSub: false,
+        oldPlanId,
+        newPlanName: plan.name,
+        billingCycle,
+        oldBillingCycle,
+      });
+    }
+
+    if (notifyTitle && notifyContent) {
+      await notify({
+        userId: subscription.employer_id,
+        type: notifyType,
+        title: notifyTitle,
+        content: notifyContent,
+      });
+    }
+  } catch (notifyErr) {
+    console.error(
+      "Failed to send subscription update notification:",
+      notifyErr,
+    );
+  }
 
   if (localStatus === "canceled" || localStatus === "expired") {
     const activeFree = await Subscription.findOne({
@@ -320,6 +418,22 @@ export const processSubscriptionDeleted = async (
 
   subscription.status = "canceled";
   await subscription.save();
+
+  try {
+    const plan = await Plan.findById(subscription.plan_id);
+    const planName = plan ? plan.name : "Paid";
+    await notify({
+      userId: subscription.employer_id,
+      type: "subscription_updated",
+      title: "Subscription Canceled",
+      content: `Your subscription to "${planName}" has ended. Your account has been reverted to the Free plan.`,
+    });
+  } catch (notifyErr) {
+    console.error(
+      "Failed to send subscription deleted notification:",
+      notifyErr,
+    );
+  }
 
   const activeFree = await Subscription.findOne({
     employer_id: subscription.employer_id,

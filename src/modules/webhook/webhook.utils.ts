@@ -1,6 +1,8 @@
 import User from "../../models/user.model.js";
 import Subscription from "../../models/subscription.model.js";
 import AppError from "../../error/AppError.js";
+import Plan from "../../models/plan.model.js";
+import { notify } from "../notification/notification.service.js";
 
 export const parseStripeDate = (val: any, fallbackOffsetMs = 0): Date => {
   if (val === undefined || val === null)
@@ -58,4 +60,73 @@ export const getOrCreateLocalSubscription = async (
     });
 
   return subscription;
+};
+
+export const getPlanRank = (name: string): number => {
+  const n = name.toLowerCase();
+  if (n.includes("premium")) return 2;
+  if (n.includes("basic")) return 1;
+  return 0;
+};
+
+export const notifySubscriptionChange = async ({
+  userId,
+  isNewPaidSub,
+  oldPlanId,
+  newPlanName,
+  billingCycle,
+  oldBillingCycle,
+}: {
+  userId: any;
+  isNewPaidSub: boolean;
+  oldPlanId?: any;
+  newPlanName: string;
+  billingCycle: string;
+  oldBillingCycle?: string;
+}): Promise<void> => {
+  try {
+    let notifyTitle = "";
+    let notifyContent = "";
+
+    if (isNewPaidSub) {
+      notifyTitle = "Subscription Started";
+      notifyContent = `Thank you for subscribing! Your "${newPlanName}" plan (${billingCycle}) is now active.`;
+    } else {
+      const oldPlan = oldPlanId ? await Plan.findById(oldPlanId) : null;
+      const oldPlanName = oldPlan ? oldPlan.name : "Free";
+
+      if (oldPlanName !== newPlanName) {
+        const rankOld = getPlanRank(oldPlanName);
+        const rankNew = getPlanRank(newPlanName);
+
+        if (rankNew > rankOld) {
+          notifyTitle = "Subscription Upgraded";
+          notifyContent = `Your subscription has been successfully upgraded from "${oldPlanName}" to "${newPlanName}" (${billingCycle}).`;
+        } else {
+          notifyTitle = "Subscription Downgraded";
+          notifyContent = `Your subscription has been downgraded from "${oldPlanName}" to "${newPlanName}" (${billingCycle}).`;
+        }
+      } else if (oldBillingCycle !== billingCycle) {
+        notifyTitle = "Billing Cycle Updated";
+        notifyContent = `Your subscription billing cycle has been changed to "${billingCycle}".`;
+      } else {
+        notifyTitle = "Subscription Renewed";
+        notifyContent = `Your subscription to "${newPlanName}" has been successfully renewed.`;
+      }
+    }
+
+    if (notifyTitle && notifyContent) {
+      await notify({
+        userId,
+        type: "payment_completed",
+        title: notifyTitle,
+        content: notifyContent,
+      });
+    }
+  } catch (notifyErr) {
+    console.error(
+      "Failed to send subscription change notification:",
+      notifyErr,
+    );
+  }
 };
