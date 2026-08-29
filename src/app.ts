@@ -20,6 +20,7 @@ import jobRouter from "./modules/job/jobRouter.js";
 import technologiesRouter from "./modules/technology/technology.router.js";
 import adminrouter from "./modules/admin/admin.route.js";
 import subscriptionRouter from "./modules/subscription/subscription.route.js";
+import commentRouter from "./modules/comment/comment.routes.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -28,6 +29,7 @@ app.use("/api/jobs", jobRouter);
 app.use("/api/technologies", technologiesRouter);
 app.use("/api/admin", adminrouter);
 app.use("/api/subscriptions", subscriptionRouter);
-
+app.use("/api/comments", commentRouter);
 app.use(errorHandler);
+
 export default app;
