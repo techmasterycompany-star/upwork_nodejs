@@ -5,7 +5,8 @@ export type NotificationType =
   | "job_rejected"
   | "application_status_changed"
   | "payment_completed"
-  | "payment_failed";
+  | "payment_failed"
+  | "application_submitted";
 
 export interface INotification {
   user_id: Types.ObjectId;

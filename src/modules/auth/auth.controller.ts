@@ -29,7 +29,9 @@ const logout = async (req: Request, res: Response) => {
 
   await authService.logout({ sessionId: req.auth.sessionId });
   clearRefreshCookie(res);
-  res.status(204).end();
+  res.status(204).json({
+    success: true,
+  });
 };
 
 const refreshToken = async (req: Request, res: Response) => {
