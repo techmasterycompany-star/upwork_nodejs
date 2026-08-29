@@ -3,9 +3,20 @@ import jobModel from "../../models/job.model.js";
 import { Types } from "mongoose";
 import { checkJobPostingQuota } from "../../utils/jobPosting.js";
 import { generateText } from "../../utils/ai.js";
+import technologyModel from "../../models/technology.model.js";
 
 export const createJob = async (jobData: any, userId: Types.ObjectId) => {
   await checkJobPostingQuota(userId.toString());
+
+  if (jobData.technologies?.length) {
+    for (const technologyId of jobData.technologies) {
+      const technology = await technologyModel.findById(technologyId);
+
+      if (!technology) {
+        throw new AppError(`Technology ${technologyId} not found`, 404);
+      }
+    }
+  }
 
   const newJob = {
     ...jobData,
@@ -14,6 +25,7 @@ export const createJob = async (jobData: any, userId: Types.ObjectId) => {
   };
 
   const job = await jobModel.create(newJob);
+
   return job;
 };
 
