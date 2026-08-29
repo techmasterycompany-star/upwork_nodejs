@@ -34,7 +34,14 @@ const register = async ({ data }: { data: RegisterInput }) => {
   };
 
   if (data.role === "employer") {
-    userData.employerProfile = data.employerProfile;
+    const employerProfile = data.employerProfile || {};
+    userData.employerProfile = {
+      company_name: employerProfile.company_name || "New Company",
+      company_logo: employerProfile.company_logo || "",
+      description: employerProfile.description || "No description yet",
+      industry: employerProfile.industry || "Not specified",
+      website: employerProfile.website || "",
+    };
   }
 
   if (data.role === "candidate") {

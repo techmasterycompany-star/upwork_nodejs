@@ -24,6 +24,8 @@ import adminrouter from "./modules/admin/admin.route.js";
 import subscriptionRouter from "./modules/subscription/subscription.route.js";
 import commentRouter from "./modules/comment/comment.routes.js";
 import categoryRouter from "./modules/category/category.router.js";
+import candidateRouter from './modules/candidate/candidate.route.js';
+import searchRouter from "./modules/search/search.route.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -37,6 +39,9 @@ app.use("/api/comments", commentRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/notifications", notificationRouter);
 app.use("/api/skills", skillRouter);
+
+app.use('/api/candidate', candidateRouter);
+app.use("/api/search", searchRouter);
 
 app.use(errorHandler);
 
