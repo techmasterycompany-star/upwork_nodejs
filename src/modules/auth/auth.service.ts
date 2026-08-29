@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import User, { IUser } from "../../models/user.model.js";
 import Session from "../../models/session.model.js";
-
+import Skill from "../../models/skill.model.js";
 import AppError from "../../error/AppError.js";
 import {
   generateAccessToken,
@@ -45,16 +45,13 @@ const register = async ({ data }: { data: RegisterInput }) => {
   }
 
   if (data.role === "candidate") {
-    const candidateProfile = data.candidateProfile || {};
-    userData.candidateProfile = {
-      headline: candidateProfile.headline || "New Candidate",
-      bio: candidateProfile.bio || "No bio yet",
-      location: candidateProfile.location || "",
-      portfolio_url: candidateProfile.portfolio_url || "",
-      resume: candidateProfile.resume || "pending",
-      skills: candidateProfile.skills || [],
-      experience_level: candidateProfile.experience_level || "entry",
-    };
+    if (data.candidateProfile.skills?.length) {
+      const skillIds = data.candidateProfile.skills.map((s) => s.skill_id);
+      const count = await Skill.countDocuments({ _id: { $in: skillIds } });
+      if (count !== skillIds.length)
+        throw new AppError("One or more skills are invalid", 400);
+    }
+    userData.candidateProfile = data.candidateProfile;
   }
 
   let newUser: any;
@@ -129,7 +126,7 @@ const login = async ({ data }: { data: LoginInput }) => {
 
   return {
     accessToken,
-    accessTokenExpiresIn: TOKEN_EXPIRATION.access_token / 1000,
+    accessTokenExpiresIn: process.env.JWT_EXPIRES_IN,
     refreshToken: rawToken,
     user: {
       id: user._id,
@@ -185,7 +182,7 @@ const refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
       role: user.role,
       sessionId: session._id.toString(),
     }),
-    accessTokenExpiresIn: TOKEN_EXPIRATION.access_token / 1000,
+    accessTokenExpiresIn: process.env.JWT_EXPIRES_IN,
     refreshToken: rawToken,
     user: {
       id: user._id,

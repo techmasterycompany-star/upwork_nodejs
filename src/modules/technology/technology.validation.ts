@@ -1,10 +1,11 @@
 import { z } from "zod";
-import mongoose from "mongoose";
+import { objectIdSchema } from "../../utils/validation.utils.js";
 
-const objectId = z.string().refine(
-  (id) => mongoose.Types.ObjectId.isValid(id),
-  "Invalid ID",
-);
+export const technologyIdSchema = z.object({
+  params: z.object({
+    id: objectIdSchema("id"),
+  }),
+});
 
 export const createTechnology = z.object({
   body: z.object({
@@ -14,9 +15,8 @@ export const createTechnology = z.object({
 
 export const updateTechnology = z.object({
   params: z.object({
-    id: objectId,
+    id: objectIdSchema("id"),
   }),
-
   body: z.object({
     name: z.string().trim().min(1, "Technology name is required"),
   }),
