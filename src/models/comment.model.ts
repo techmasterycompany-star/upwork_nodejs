@@ -1,6 +1,5 @@
 import { Schema, model, Types } from "mongoose";
 
-//interface to represnt the type of report later
 interface ICommentReport {
   user_id: Types.ObjectId;
   reason?: string;

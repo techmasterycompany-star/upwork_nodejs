@@ -53,7 +53,8 @@ export const reademployeeJobs = async (req: Request, res: Response) => {
 
 export const readJob = async (req: Request, res: Response) => {
   const id = req.params.id as string;
-  const job = await readJobById(id);
+  if (!req.user) throw new AppError("User not authenticated", 401);
+  const job = await readJobById(id, req.user);
   res.status(200).json({
     success: true,
     message: "get Job successfully",
@@ -101,17 +102,10 @@ export const deleteJob = async (req: Request, res: Response) => {
   });
 };
 
-
-export const generateJobDescription = async (
-  req: Request,
-  res: Response,
-) => {
+export const generateJobDescription = async (req: Request, res: Response) => {
   const { title, experience_level } = req.body;
 
-  const result = await generateJobDescriptionService(
-    title,
-    experience_level,
-  );
+  const result = await generateJobDescriptionService(title, experience_level);
 
   res.status(200).json({
     success: true,
