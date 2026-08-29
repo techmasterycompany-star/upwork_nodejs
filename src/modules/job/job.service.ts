@@ -67,6 +67,16 @@ export const updateJob = async (
   userId: Types.ObjectId,
   jobData: any,
 ) => {
+  if (jobData.technologies?.length) {
+    for (const technologyId of jobData.technologies) {
+      const technology = await technologyModel.findById(technologyId);
+
+      if (!technology) {
+        throw new AppError(`Technology ${technologyId} not found`, 404);
+      }
+    }
+  }
+
   const job = await jobModel.findOneAndUpdate(
     {
       _id: id,
