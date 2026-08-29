@@ -33,7 +33,6 @@ export const searchJobs = async (query: SearchJobsQuery, userId?: string) => {
   if (work_type) filter.work_type = work_type;
   if (experience_level) filter.experience_level = experience_level;
 
-  // ✅ التصحيح هنا
   if (salary_min !== undefined || salary_max !== undefined) {
     filter.salary_min = {};
     filter.salary_max = {};
@@ -75,7 +74,11 @@ export const searchJobs = async (query: SearchJobsQuery, userId?: string) => {
   };
 };
 
-export const saveSearch = async (userId: string, name: string, filters: Record<string, any>) => {
+export const saveSearch = async (
+  userId: string,
+  name: string,
+  filters: Record<string, any>,
+) => {
   const savedSearch = await SavedSearch.create({
     user_id: userId,
     name,
@@ -85,11 +88,16 @@ export const saveSearch = async (userId: string, name: string, filters: Record<s
 };
 
 export const getSavedSearches = async (userId: string) => {
-  return await SavedSearch.find({ user_id: userId }).sort({ createdAt: -1 }).lean();
+  return await SavedSearch.find({ user_id: userId })
+    .sort({ createdAt: -1 })
+    .lean();
 };
 
 export const deleteSavedSearch = async (userId: string, searchId: string) => {
-  const result = await SavedSearch.findOneAndDelete({ _id: searchId, user_id: userId });
+  const result = await SavedSearch.findOneAndDelete({
+    _id: searchId,
+    user_id: userId,
+  });
   if (!result) throw new AppError("Saved search not found", 404);
   return result;
 };

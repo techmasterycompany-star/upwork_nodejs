@@ -8,8 +8,10 @@ export const searchJobsSchema = z.object({
     work_type: z.enum(["remote", "onsite", "hybrid"]).optional(),
     salary_min: z.coerce.number().min(0).optional(),
     salary_max: z.coerce.number().min(0).optional(),
-    experience_level: z.enum(["entry", "junior", "mid", "senior", "lead"]).optional(),
-    date_posted: z.coerce.number().min(1).optional(), // عدد الأيام
+    experience_level: z
+      .enum(["entry", "junior", "mid", "senior", "lead"])
+      .optional(),
+    date_posted: z.coerce.number().min(1).optional(),
     sort_by: z.enum(["created_at", "salary"]).default("created_at"),
     order: z.enum(["asc", "desc"]).default("desc"),
     page: z.coerce.number().min(1).default(1),

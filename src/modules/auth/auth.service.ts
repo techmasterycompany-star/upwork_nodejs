@@ -51,7 +51,7 @@ const register = async ({ data }: { data: RegisterInput }) => {
       bio: candidateProfile.bio || "No bio yet",
       location: candidateProfile.location || "",
       portfolio_url: candidateProfile.portfolio_url || "",
-      resume: candidateProfile.resume || "pending", // ✅ قيمة غير فارغة
+      resume: candidateProfile.resume || "pending",
       skills: candidateProfile.skills || [],
       experience_level: candidateProfile.experience_level || "entry",
     };
