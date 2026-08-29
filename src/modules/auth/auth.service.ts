@@ -34,11 +34,27 @@ const register = async ({ data }: { data: RegisterInput }) => {
   };
 
   if (data.role === "employer") {
-    userData.employerProfile = data.employerProfile;
+    const employerProfile = data.employerProfile || {};
+    userData.employerProfile = {
+      company_name: employerProfile.company_name || "New Company",
+      company_logo: employerProfile.company_logo || "",
+      description: employerProfile.description || "No description yet",
+      industry: employerProfile.industry || "Not specified",
+      website: employerProfile.website || "",
+    };
   }
 
   if (data.role === "candidate") {
-    userData.candidateProfile = data.candidateProfile;
+    const candidateProfile = data.candidateProfile || {};
+    userData.candidateProfile = {
+      headline: candidateProfile.headline || "New Candidate",
+      bio: candidateProfile.bio || "No bio yet",
+      location: candidateProfile.location || "",
+      portfolio_url: candidateProfile.portfolio_url || "",
+      resume: candidateProfile.resume || "pending", // ✅ قيمة غير فارغة
+      skills: candidateProfile.skills || [],
+      experience_level: candidateProfile.experience_level || "entry",
+    };
   }
 
   let newUser: any;
