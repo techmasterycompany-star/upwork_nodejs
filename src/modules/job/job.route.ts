@@ -34,7 +34,6 @@ jobRouter.get(
 jobRouter.get(
   "/:id",
   authMiddleware,
-  authorize("employer"),
   validate(jobIdSchema),
   readJob,
 );

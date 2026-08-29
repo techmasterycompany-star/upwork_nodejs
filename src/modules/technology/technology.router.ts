@@ -10,7 +10,11 @@ import {
   readAllTechnologies,
   updateTechnologie,
 } from "./technology.controller.js";
-import { createTechnology, updateTechnology } from "./technology.validation.js";
+import {
+  createTechnology,
+  updateTechnology,
+  technologyIdSchema,
+} from "./technology.validation.js";
 
 const technologiesRouter = Router();
 
@@ -19,7 +23,7 @@ technologiesRouter.get("/", authMiddleware, readAllTechnologies);
 technologiesRouter.post(
   "/create",
   authMiddleware,
-  authorize("employer"),
+  authorize("admin"),
   validate(createTechnology),
   createNewTechnologies,
 );
@@ -27,8 +31,7 @@ technologiesRouter.post(
 technologiesRouter.patch(
   "/update/:id",
   authMiddleware,
-
-  authorize("employer"),
+  authorize("admin"),
   validate(updateTechnology),
   updateTechnologie,
 );
@@ -36,7 +39,8 @@ technologiesRouter.patch(
 technologiesRouter.delete(
   "/delete/:id",
   authMiddleware,
-  authorize("employer"),
+  authorize("admin"),
+  validate(technologyIdSchema),
   deleteTechnologie,
 );
 

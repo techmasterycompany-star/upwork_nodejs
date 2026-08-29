@@ -1,27 +1,43 @@
 import AppError from "../../error/AppError.js";
 import jobModel from "../../models/job.model.js";
-import { Types } from "mongoose";
+import { IUser } from "../../models/user.model.js";
+import categoryModel from "../../models/category.model.js";
+import technologyModel from "../../models/technology.model.js";
+import { HydratedDocument, Types } from "mongoose";
 import { checkJobPostingQuota } from "../../utils/jobPosting.js";
 import { generateText } from "../../utils/ai.js";
-import technologyModel from "../../models/technology.model.js";
+import type { CreateJobInput, UpdateJobInput } from "./Job.Validation.js";
+import JobView from "../../models/jobView.model.js";
 
-export const createJob = async (jobData: any, userId: Types.ObjectId) => {
+const assertCategoryExists = async (categoryId: string) => {
+  const category = await categoryModel.findById(categoryId);
+  if (!category) throw new AppError("Invalid category", 400);
+};
+
+const assertTechnologiesExist = async (technologyIds: string[]) => {
+  const count = await technologyModel.countDocuments({
+    _id: { $in: technologyIds },
+  });
+  if (count !== technologyIds.length)
+    throw new AppError("One or more technologies are invalid", 400);
+};
+
+export const createJob = async (
+  jobData: CreateJobInput,
+  userId: Types.ObjectId,
+) => {
   await checkJobPostingQuota(userId.toString());
 
-  if (jobData.technologies?.length) {
-    for (const technologyId of jobData.technologies) {
-      const technology = await technologyModel.findById(technologyId);
+  await assertCategoryExists(jobData.category_id);
 
-      if (!technology) {
-        throw new AppError(`Technology ${technologyId} not found`, 404);
-      }
-    }
+  if (jobData.technologies?.length) {
+    await assertTechnologiesExist(jobData.technologies);
   }
 
   const newJob = {
     ...jobData,
     employer_id: userId,
-    status: "pending_approval",
+    status: "pending_approval" as "pending_approval",
   };
 
   const job = await jobModel.create(newJob);
@@ -44,17 +60,36 @@ export const getemployeeJobs = async (id: Types.ObjectId) => {
   return Jobs;
 };
 
-export const readJobById = async (id: string) => {
-  const job = await jobModel.findOneAndUpdate(
-    {
+export const readJobById = async (
+  id: string,
+  user: HydratedDocument<IUser>,
+) => {
+  let job;
+
+  if (user.role === "candidate") {
+    try {
+      await JobView.create({ job_id: id, candidate_id: user._id });
+      job = await jobModel.findOneAndUpdate(
+        { _id: id, status: "approved" },
+        { $inc: { views_count: 1 } },
+        { new: true },
+      );
+    } catch (error: any) {
+      if (error?.code === 11000) {
+        job = await jobModel.findOne({ _id: id, status: "approved" });
+      } else {
+        throw error;
+      }
+    }
+  } else if (user.role === "employer") {
+    job = await jobModel.findOne({
       _id: id,
-      status: "approved",
-    },
-    {
-      $inc: { views_count: 1 },
-    },
-    { new: true },
-  );
+      employer_id: user._id,
+    });
+  } else if (user.role === "admin") {
+    job = await jobModel.findById(id);
+  }
+
   if (!job) {
     throw new AppError("Job not found", 404);
   }
@@ -65,16 +100,14 @@ export const readJobById = async (id: string) => {
 export const updateJob = async (
   id: string,
   userId: Types.ObjectId,
-  jobData: any,
+  jobData: UpdateJobInput,
 ) => {
-  if (jobData.technologies?.length) {
-    for (const technologyId of jobData.technologies) {
-      const technology = await technologyModel.findById(technologyId);
+  if (jobData.category_id) {
+    await assertCategoryExists(jobData.category_id);
+  }
 
-      if (!technology) {
-        throw new AppError(`Technology ${technologyId} not found`, 404);
-      }
-    }
+  if (jobData.technologies?.length) {
+    await assertTechnologiesExist(jobData.technologies);
   }
 
   const job = await jobModel.findOneAndUpdate(
@@ -83,7 +116,7 @@ export const updateJob = async (
       employer_id: userId,
     },
     jobData,
-    { new: true },
+    { new: true, runValidators: true },
   );
 
   if (!job) {

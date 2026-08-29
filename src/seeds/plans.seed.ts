@@ -26,8 +26,8 @@ const plans = [
     is_featured: false,
     has_direct_messaging: true,
     has_premium_reports: false,
-    stripe_price_id_monthly: "price_1U5UJRJxSs4XNSXxW8CSG8OW",
-    stripe_price_id_yearly: "price_1U5UfNJxSs4XNSXxPPijtat5",
+    stripe_price_id_monthly: "price_1U9kvO4lzeOivqMUkm9PLaW0",
+    stripe_price_id_yearly: "price_1U9kxt4lzeOivqMUbFsi0sDA",
   },
   {
     name: "Premium",
@@ -37,8 +37,8 @@ const plans = [
     is_featured: true,
     has_direct_messaging: true,
     has_premium_reports: true,
-    stripe_price_id_monthly: "price_1U5UK2JxSs4XNSXxF5I32A8E",
-    stripe_price_id_yearly: "price_1U5UebJxSs4XNSXxeGE4oLZe",
+    stripe_price_id_monthly: "price_1U9kyc4lzeOivqMUdN74tVcd",
+    stripe_price_id_yearly: "price_1U9kyq4lzeOivqMU5U6INxJh",
   },
 ];
 

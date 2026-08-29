@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { objectIdSchema } from "../../utils/validation.utils.js";
 
 export const createJobSchema = z.object({
   body: z.object({
@@ -13,7 +14,7 @@ export const createJobSchema = z.object({
         (id) => mongoose.Types.ObjectId.isValid(id),
         "Invalid category ID",
       ),
-    technologies: z.array(z.string()).optional(),
+    technologies: z.array(objectIdSchema("technology_id")).optional(),
     location: z.string().trim().optional(),
     work_type: z.enum(["remote", "onsite", "hybrid"]),
     salary_min: z.number().min(0).optional(),
@@ -27,7 +28,7 @@ export const createJobSchema = z.object({
 
 export const jobIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1, "Job ID is required"),
+    id: objectIdSchema("id"),
   }),
 });
 
@@ -59,6 +60,8 @@ export const updateJobSchema = z.object({
 
     salary_max: z.number().min(0).optional(),
 
+    technologies: z.array(objectIdSchema("technology_id")).optional(),
+
     experience_level: z
       .enum(["entry", "junior", "mid", "senior", "lead"])
       .optional(),
@@ -74,3 +77,6 @@ export const generateJobDescriptionSchema = z.object({
     experience_level: z.enum(["entry", "junior", "mid", "senior", "lead"]),
   }),
 });
+
+export type CreateJobInput = z.infer<typeof createJobSchema>["body"];
+export type UpdateJobInput = z.infer<typeof updateJobSchema>["body"];

@@ -15,24 +15,28 @@ app.use("/uploads", express.static("uploads"));
 import notificationRouter from "./modules/notification/notification.route.js";
 import applicationRouter from "./modules/application/application.route.js";
 import healthRoutes from "./modules/health/health.route.js";
+import skillRouter from "./modules/skill/skill.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
 import employerRouter from "./modules/employer/employer.route.js";
-import jobRouter from "./modules/job/jobRouter.js";
+import jobRouter from "./modules/job/job.route.js";
 import technologiesRouter from "./modules/technology/technology.router.js";
 import adminrouter from "./modules/admin/admin.route.js";
 import subscriptionRouter from "./modules/subscription/subscription.route.js";
 import commentRouter from "./modules/comment/comment.routes.js";
+import categoryRouter from "./modules/category/category.router.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/employer", employerRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/technologies", technologiesRouter);
+app.use("/api/categories", categoryRouter);
 app.use("/api/admin", adminrouter);
 app.use("/api/subscriptions", subscriptionRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/application", applicationRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/skills", skillRouter);
 
 app.use(errorHandler);
 
