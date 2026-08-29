@@ -35,28 +35,26 @@ export const updateCandidateProfile = async (
   if (!user) throw new AppError('User not found', 404);
   if (user.role !== 'candidate') throw new AppError('Not a candidate', 403);
 
+  const profile = user.candidateProfile ?? {
+    headline: '',
+    bio: '',
+    location: '',
+    portfolio_url: '',
+    resume: '',
+    skills: [],
+    experience_level: 'entry' as const,
+  };
 
-  if (!user.candidateProfile) {
-    user.candidateProfile = {
-      headline: '',
-      bio: '',
-      location: '',
-      portfolio_url: '',
-      resume: '',
-      skills: [],
-      experience_level: 'entry',
-    } as any; 
-  }
+  user.candidateProfile = profile;
 
-
-  if (data.headline !== undefined) user.candidateProfile.headline = data.headline;
-  if (data.bio !== undefined) user.candidateProfile.bio = data.bio;
-  if (data.location !== undefined) user.candidateProfile.location = data.location;
-  if (data.portfolio_url !== undefined) user.candidateProfile.portfolio_url = data.portfolio_url;
-  if (data.experience_level !== undefined) user.candidateProfile.experience_level = data.experience_level;
+  if (data.headline !== undefined && data.headline !== null) profile.headline = data.headline;
+  if (data.bio !== undefined && data.bio !== null) profile.bio = data.bio;
+  if (data.location !== undefined && data.location !== null) profile.location = data.location;
+  if (data.portfolio_url !== undefined && data.portfolio_url !== null) profile.portfolio_url = data.portfolio_url;
+  if (data.experience_level !== undefined) profile.experience_level = data.experience_level;
 
   await user.save();
-  return user.candidateProfile;
+  return profile;
 };
 
 export const updateSkills = async (userId: string, skillsData: { name: string; years_of_experience: number }[]) => {
@@ -79,17 +77,17 @@ export const updateSkills = async (userId: string, skillsData: { name: string; y
   );
 
 
-  if (!user.candidateProfile) {
-    user.candidateProfile = {
-      headline: '',
-      bio: '',
-      location: '',
-      portfolio_url: '',
-      resume: '',
-      skills: [],
-      experience_level: 'entry',
-    } as any;
-  }
+  const profile = user.candidateProfile ?? {
+    headline: '',
+    bio: '',
+    location: '',
+    portfolio_url: '',
+    resume: '',
+    skills: [],
+    experience_level: 'entry' as const,
+  };
+
+  user.candidateProfile = profile;
   user.candidateProfile.skills = skillIds;
 
   await user.save();

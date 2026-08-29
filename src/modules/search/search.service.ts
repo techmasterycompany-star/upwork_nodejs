@@ -3,6 +3,51 @@ import SavedSearch from "../../models/savedSearch.model.js";
 import AppError from "../../error/AppError.js";
 import { SearchJobsQuery } from "./search.validation.js";
 
+const normalizeSearchJobsQuery = (
+  filters: Record<string, any> = {},
+): SearchJobsQuery => {
+  const sort_by = filters.sort_by === "salary" ? "salary" : "created_at";
+  const order = filters.order === "asc" ? "asc" : "desc";
+
+  return {
+    q: typeof filters.q === "string" ? filters.q : undefined,
+    location:
+      typeof filters.location === "string" ? filters.location : undefined,
+    category_id:
+      typeof filters.category_id === "string" ? filters.category_id : undefined,
+    work_type:
+      filters.work_type === "remote" ||
+      filters.work_type === "onsite" ||
+      filters.work_type === "hybrid"
+        ? filters.work_type
+        : undefined,
+    salary_min:
+      filters.salary_min !== undefined && filters.salary_min !== null
+        ? Number(filters.salary_min)
+        : undefined,
+    salary_max:
+      filters.salary_max !== undefined && filters.salary_max !== null
+        ? Number(filters.salary_max)
+        : undefined,
+    experience_level:
+      filters.experience_level === "entry" ||
+      filters.experience_level === "junior" ||
+      filters.experience_level === "mid" ||
+      filters.experience_level === "senior" ||
+      filters.experience_level === "lead"
+        ? filters.experience_level
+        : undefined,
+    date_posted:
+      filters.date_posted !== undefined && filters.date_posted !== null
+        ? Number(filters.date_posted)
+        : undefined,
+    sort_by,
+    order,
+    page: Number(filters.page ?? 1),
+    limit: Number(filters.limit ?? 10),
+  };
+};
+
 export const searchJobs = async (query: SearchJobsQuery, userId?: string) => {
   const {
     q,
@@ -105,5 +150,8 @@ export const deleteSavedSearch = async (userId: string, searchId: string) => {
 export const applySavedSearch = async (userId: string, searchId: string) => {
   const saved = await SavedSearch.findOne({ _id: searchId, user_id: userId });
   if (!saved) throw new AppError("Saved search not found", 404);
-  return await searchJobs(saved.filters, userId);
+  const normalizedQuery = normalizeSearchJobsQuery(
+    saved.filters as Record<string, any>,
+  );
+  return await searchJobs(normalizedQuery, userId);
 };

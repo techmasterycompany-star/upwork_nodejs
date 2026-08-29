@@ -22,9 +22,11 @@ export const searchJobsSchema = z.object({
 export const saveSearchSchema = z.object({
   body: z.object({
     name: z.string().min(1, "Search name is required"),
-    filters: z.record(z.any()).refine((val) => Object.keys(val).length > 0, {
-      message: "Filters cannot be empty",
-    }),
+    filters: z
+      .record(z.string(), z.any())
+      .refine((val) => Object.keys(val).length > 0, {
+        message: "Filters cannot be empty",
+      }),
   }),
 });
 
