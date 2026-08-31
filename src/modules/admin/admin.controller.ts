@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as adminService from "./admin.service.js";
 import type { ListUsersQuery } from "./admin.validation.js";
+import AppError from "../../error/AppError.js";
 
 // Job Approval
 
@@ -18,8 +19,9 @@ export const approveJob = async (req: Request, res: Response) => {
 
 export const rejectJob = async (req: Request, res: Response) => {
   const id = req.params.id as string;
+  const { rejection_reason } = req.body;
 
-  const job = await adminService.rejectedJob(id);
+  const job = await adminService.rejectedJob(id, rejection_reason);
 
   res.status(200).json({
     success: true,
@@ -30,10 +32,7 @@ export const rejectJob = async (req: Request, res: Response) => {
 
 // User Management
 
-export const listUsers = async (
-  req: Request,
-  res: Response,
-) => {
+export const listUsers = async (req: Request, res: Response) => {
   const query = req.query as unknown as ListUsersQuery;
 
   const result = await adminService.listUsers(query);

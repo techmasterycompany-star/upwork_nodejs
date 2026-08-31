@@ -1,17 +1,20 @@
 import z from "zod";
-import mongoose from "mongoose";
+import { objectIdSchema } from "../../utils/validation.utils.js";
 
 export const jobIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1, "Job ID is required"),
+    id: objectIdSchema("id"),
   }),
 });
 
-const objectId = z
-  .string()
-  .refine((id) => mongoose.Types.ObjectId.isValid(id), {
-    message: "Invalid user id",
-  });
+export const rejectJobSchema = z.object({
+  params: z.object({
+    id: objectIdSchema("id"),
+  }),
+  body: z.object({
+    rejection_reason: z.string().trim().max(500),
+  }),
+});
 
 export const listUsersSchema = z.object({
   query: z.object({
@@ -32,7 +35,7 @@ export const listUsersSchema = z.object({
 
 export const userIdParamSchema = z.object({
   params: z.object({
-    id: objectId,
+    id: objectIdSchema("id"),
   }),
 });
 

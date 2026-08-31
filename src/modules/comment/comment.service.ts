@@ -1,4 +1,6 @@
+import AppError from "../../error/AppError.js";
 import Comment from "../../models/comment.model.js";
+import User from "../../models/user.model.js";
 import Job from "../../models/job.model.js";
 import mongoose from "mongoose";
 
@@ -10,11 +12,19 @@ export const createComment = async (
 ) => {
   const job = await Job.findById(jobId);
   if (!job) {
-    throw new Error("Job not found");
+    throw new AppError("Job not found", 404);
   }
 
   if (job.status !== "approved") {
-    throw new Error("Comments are only allowed on approved jobs");
+    throw new AppError("Comments are only allowed on approved jobs", 400);
+  }
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  if (user.is_blocked || user.deletedAt) {
+    throw new AppError("User is not active", 403);
   }
 
   const comment = await Comment.create({
@@ -33,13 +43,13 @@ export const updateComment = async (
 ) => {
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Cannot edit a deleted comment");
+    throw new AppError("Cannot edit a deleted comment", 422);
   }
   if (comment.user_id.toString() !== userId) {
-    throw new Error("You can only edit your own comments");
+    throw new AppError("You can only edit your own comments", 403);
   }
 
   comment.content = content;
@@ -52,13 +62,13 @@ export const updateComment = async (
 export const deleteComment = async (commentId: string, userId: string) => {
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Cannot edit a deleted comment");
+    throw new AppError("Cannot edit a deleted comment", 422);
   }
   if (comment.user_id.toString() !== userId) {
-    throw new Error("You can only delete your own comments");
+    throw new AppError("You can only delete your own comments", 403);
   }
   comment.deletedAt = new Date();
   await comment.save();
@@ -74,16 +84,16 @@ export const reportComment = async (
 ) => {
   const comment = await Comment.findById(commentId);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Cannot report a deleted comment");
+    throw new AppError("Cannot report a deleted comment", 422);
   }
   const alreadyReported = comment.reports?.some(
     (report) => report.user_id.toString() === userId,
   );
   if (alreadyReported) {
-    throw new Error("You already reported this comment before");
+    throw new AppError("You already reported this comment before", 422);
   }
   if (!comment.reports) {
     comment.reports = [];
@@ -107,10 +117,10 @@ export const adminListComments = async () => {
 export const adminHideComment = async (commentID: string) => {
   const comment = await Comment.findById(commentID);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Cannot hide a deleted comment");
+    throw new AppError("Cannot hide a deleted comment", 422);
   }
   comment.is_approved = false;
   await comment.save();
@@ -121,10 +131,10 @@ export const adminHideComment = async (commentID: string) => {
 export const adminUnhideComment = async (commentID: string) => {
   const comment = await Comment.findById(commentID);
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Cannot unhide a deleted comment");
+    throw new AppError("Cannot unhide a deleted comment", 422);
   }
   comment.is_approved = true;
   await comment.save();
@@ -136,10 +146,10 @@ export const adminRemoveComment = async (commentId: string) => {
   const comment = await Comment.findById(commentId);
 
   if (!comment) {
-    throw new Error("Comment not found");
+    throw new AppError("Comment not found", 404);
   }
   if (comment.deletedAt) {
-    throw new Error("Comment is already deleted");
+    throw new AppError("Comment is already deleted", 422);
   }
   comment.deletedAt = new Date();
   await comment.save();

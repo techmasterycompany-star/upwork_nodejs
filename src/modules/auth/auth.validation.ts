@@ -17,7 +17,6 @@ const employerProfileBody = z
 const candidateSkillBody = z
   .object({
     skill_id: objectIdSchema("skill_id"),
-    years_of_experience: z.number().min(0).optional(),
   })
   .strict();
 

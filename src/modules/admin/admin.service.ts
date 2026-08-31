@@ -2,6 +2,7 @@ import User from "../../models/user.model.js";
 import AppError from "../../error/AppError.js";
 import type { ListUsersQuery } from "./admin.validation.js";
 import jobModel from "../../models/job.model.js";
+import * as notificationService from "../notification/notification.service.js";
 
 export const approvedJob = async (id: string) => {
   const job = await jobModel.findOneAndUpdate(
@@ -14,19 +15,33 @@ export const approvedJob = async (id: string) => {
     throw new AppError("Not Found", 404);
   }
 
+  await notificationService.notify({
+    userId: job.employer_id,
+    type: "job_approved",
+    title: "Your job listing was approved",
+    content: `Your job "${job.title}" is now live and visible to candidates.`,
+  });
+
   return job;
 };
 
-export const rejectedJob = async (id: string) => {
+export const rejectedJob = async (id: string, rejection_reason: string) => {
   const job = await jobModel.findOneAndUpdate(
     { _id: id },
-    { $set: { status: "rejected" } },
+    { $set: { status: "rejected", rejection_reason: rejection_reason } },
     { new: true },
   );
 
   if (!job) {
     throw new AppError("Not Found", 404);
   }
+
+  await notificationService.notify({
+    userId: job.employer_id,
+    type: "job_rejected",
+    title: "Your job listing was rejected",
+    content: `Your job "${job.title}" was rejected. Reason: ${rejection_reason}`,
+  });
 
   return job;
 };
