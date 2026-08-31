@@ -1,11 +1,5 @@
 import z from "zod";
-import mongoose from "mongoose";
-
-const objectId = z
-  .string()
-  .refine((id) => mongoose.Types.ObjectId.isValid(id), {
-    message: "Invalid id",
-  });
+import { objectIdSchema } from "../../utils/validation.utils.js";
 
 export const commentBodySchema = z.object({
   body: z.object({
@@ -21,12 +15,12 @@ export const reportBodySchema = z.object({
 
 export const jobIdParamSchema = z.object({
   params: z.object({
-    jobId: objectId,
+    jobId: objectIdSchema("jobId"),
   }),
 });
 
 export const commentIdParamSchema = z.object({
   params: z.object({
-    id: objectId,
+    id: objectIdSchema("id"),
   }),
 });

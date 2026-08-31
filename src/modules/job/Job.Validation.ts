@@ -8,12 +8,7 @@ export const createJobSchema = z.object({
     description: z.string().trim().min(1, "Description is required"),
     responsibilities: z.string().trim().min(1, "Responsibilities is required"),
     requirements: z.string().trim().min(1, "Requirements is required"),
-    category_id: z
-      .string()
-      .refine(
-        (id) => mongoose.Types.ObjectId.isValid(id),
-        "Invalid category ID",
-      ),
+    category_id: objectIdSchema("category_id"),
     technologies: z.array(objectIdSchema("technology_id")).optional(),
     location: z.string().trim().optional(),
     work_type: z.enum(["remote", "onsite", "hybrid"]),
@@ -50,7 +45,7 @@ export const updateJobSchema = z.object({
       .min(1, "Requirements is required")
       .optional(),
 
-    category_id: z.string().min(1, "Category is required").optional(),
+    category_id: objectIdSchema("category_id").optional(),
 
     location: z.string().trim().min(1, "Location is required").optional(),
 
