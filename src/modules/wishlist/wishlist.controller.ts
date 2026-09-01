@@ -2,12 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import * as wishlistService from "./wishlist.service.js";
 import AppError from "../../error/AppError.js";
 
-
-export const addToWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const addToWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
-
 
     if (req.user?.role !== "candidate") {
       throw new AppError("Only candidates can use wishlist", 403);
@@ -26,8 +28,11 @@ export const addToWishlist = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-
-export const getWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const getWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
@@ -47,8 +52,11 @@ export const getWishlist = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-
-export const removeFromWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const removeFromWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
@@ -58,7 +66,7 @@ export const removeFromWishlist = async (req: Request, res: Response, next: Next
     }
 
     const { id } = req.params;
-    await wishlistService.removeFromWishlist(userId, id);
+    await wishlistService.removeFromWishlist(userId, id as string);
 
     res.status(200).json({
       success: true,
@@ -69,8 +77,11 @@ export const removeFromWishlist = async (req: Request, res: Response, next: Next
   }
 };
 
-
-export const removeByJobId = async (req: Request, res: Response, next: NextFunction) => {
+export const removeByJobId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
@@ -80,7 +91,7 @@ export const removeByJobId = async (req: Request, res: Response, next: NextFunct
     }
 
     const { jobId } = req.params;
-    await wishlistService.removeByJobId(userId, jobId);
+    await wishlistService.removeByJobId(userId, jobId as string);
 
     res.status(200).json({
       success: true,
@@ -91,8 +102,11 @@ export const removeByJobId = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-
-export const checkInWishlist = async (req: Request, res: Response, next: NextFunction) => {
+export const checkInWishlist = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError("User not authenticated", 401);
@@ -102,7 +116,7 @@ export const checkInWishlist = async (req: Request, res: Response, next: NextFun
     }
 
     const { jobId } = req.params;
-    const exists = await wishlistService.isInWishlist(userId, jobId);
+    const exists = await wishlistService.isInWishlist(userId, jobId as string);
 
     res.status(200).json({
       success: true,
