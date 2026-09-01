@@ -45,13 +45,30 @@ const register = async ({ data }: { data: RegisterInput }) => {
   }
 
   if (data.role === "candidate") {
-    if (data.candidateProfile.skills?.length) {
+
+    if (data.candidateProfile?.skills?.length) {
       const skillIds = data.candidateProfile.skills.map((s) => s.skill_id);
       const count = await Skill.countDocuments({ _id: { $in: skillIds } });
       if (count !== skillIds.length)
         throw new AppError("One or more skills are invalid", 400);
     }
-    userData.candidateProfile = data.candidateProfile;
+
+
+    const candidateProfile = data.candidateProfile || {};
+    const resumeValue =
+      candidateProfile.resume && candidateProfile.resume.trim() !== ""
+        ? candidateProfile.resume
+        : "pending";
+
+    userData.candidateProfile = {
+      headline: candidateProfile.headline || "",
+      bio: candidateProfile.bio || "",
+      location: candidateProfile.location || "",
+      portfolio_url: candidateProfile.portfolio_url || "",
+      resume: resumeValue,
+      skills: candidateProfile.skills || [],
+      experience_level: candidateProfile.experience_level || "entry",
+    };
   }
 
   let newUser: any;

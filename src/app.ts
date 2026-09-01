@@ -26,6 +26,7 @@ import commentRouter from "./modules/comment/comment.routes.js";
 import categoryRouter from "./modules/category/category.router.js";
 import candidateRouter from './modules/candidate/candidate.route.js';
 import searchRouter from "./modules/search/search.route.js";
+import wishlistRouter from "./modules/wishlist/wishlist.route.js";
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
@@ -42,6 +43,8 @@ app.use("/api/skills", skillRouter);
 
 app.use('/api/candidate', candidateRouter);
 app.use("/api/search", searchRouter);
+app.use("/api/wishlist", wishlistRouter);
+
 
 app.use(errorHandler);
 
