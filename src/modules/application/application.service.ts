@@ -29,7 +29,14 @@ export const applyToJob = async ({
   if (job.application_deadline <= new Date())
     throw new AppError("The application deadline for this job has passed", 400);
 
-  let resume = resumeFile ? `/uploads/${resumeFile.filename}` : undefined;
+  let resume: string | undefined;
+  if (resumeFile) {
+    const uploaded = await uploadBuffer(resumeFile.buffer, {
+      folder: "job-board/resumes",
+      resource_type: "raw",
+    });
+    resume = uploaded.url;
+  }
 
   if (!resume) {
     const candidate = await User.findById(candidateId).select(
@@ -202,6 +209,7 @@ export const cancelApplication = async ({
 };
 
 import { generateText } from "../../utils/ai.js";
+import { uploadBuffer } from "../../utils/cloudinary.js";
 
 interface GenerateCoverLetterInput {
   jobId: string;

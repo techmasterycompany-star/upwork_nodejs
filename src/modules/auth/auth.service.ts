@@ -37,7 +37,7 @@ const register = async ({ data }: { data: RegisterInput }) => {
     const employerProfile = data.employerProfile || {};
     userData.employerProfile = {
       company_name: employerProfile.company_name || "New Company",
-      company_logo: employerProfile.company_logo || "",
+      company_logo: "",
       description: employerProfile.description || "No description yet",
       industry: employerProfile.industry || "Not specified",
       website: employerProfile.website || "",
@@ -45,7 +45,6 @@ const register = async ({ data }: { data: RegisterInput }) => {
   }
 
   if (data.role === "candidate") {
-
     if (data.candidateProfile?.skills?.length) {
       const skillIds = data.candidateProfile.skills.map((s) => s.skill_id);
       const count = await Skill.countDocuments({ _id: { $in: skillIds } });
@@ -53,19 +52,14 @@ const register = async ({ data }: { data: RegisterInput }) => {
         throw new AppError("One or more skills are invalid", 400);
     }
 
-
     const candidateProfile = data.candidateProfile || {};
-    const resumeValue =
-      candidateProfile.resume && candidateProfile.resume.trim() !== ""
-        ? candidateProfile.resume
-        : "pending";
 
     userData.candidateProfile = {
       headline: candidateProfile.headline || "",
       bio: candidateProfile.bio || "",
       location: candidateProfile.location || "",
       portfolio_url: candidateProfile.portfolio_url || "",
-      resume: resumeValue,
+      resume: "",
       skills: candidateProfile.skills || [],
       experience_level: candidateProfile.experience_level || "entry",
     };
