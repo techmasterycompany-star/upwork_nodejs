@@ -4,14 +4,12 @@ import errorHandler from "./utils/errorHandler.js";
 import cors from "cors";
 
 const app = express();
-// app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
-
-import webhookRouter from "./modules/webhook/webhook.route.js";
-app.use("/api/webhooks", webhookRouter);
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
+import webhookRouter from "./modules/webhook/webhook.route.js";
 import notificationRouter from "./modules/notification/notification.route.js";
 import applicationRouter from "./modules/application/application.route.js";
 import healthRoutes from "./modules/health/health.route.js";
@@ -33,6 +31,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/chatbot", chatbotRouter);
 app.use("/api/employer", employerRouter);
+app.use("/api/webhooks", webhookRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/technologies", technologiesRouter);
 app.use("/api/categories", categoryRouter);
