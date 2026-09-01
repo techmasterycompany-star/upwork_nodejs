@@ -1,9 +1,10 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-
 import errorHandler from "./utils/errorHandler.js";
+import cors from "cors";
 
 const app = express();
+app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 
 import webhookRouter from "./modules/webhook/webhook.route.js";
 app.use("/api/webhooks", webhookRouter);
@@ -45,7 +46,6 @@ app.use("/api/skills", skillRouter);
 app.use("/api/candidate", candidateRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/wishlist", wishlistRouter);
-
 
 app.use(errorHandler);
 
