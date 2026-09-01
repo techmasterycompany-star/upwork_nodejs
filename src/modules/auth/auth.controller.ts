@@ -29,7 +29,9 @@ const logout = async (req: Request, res: Response) => {
 
   await authService.logout({ sessionId: req.auth.sessionId });
   clearRefreshCookie(res);
-  res.status(204).end();
+  res.status(204).json({
+    success: true,
+  });
 };
 
 const refreshToken = async (req: Request, res: Response) => {
@@ -45,4 +47,18 @@ const refreshToken = async (req: Request, res: Response) => {
   });
 };
 
-export { register, login, logout, refreshToken };
+const me = (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  const user = authService.me({
+    user: req.user,
+  });
+
+  res.json({
+    success: true,
+    data: user,
+  });
+};
+
+export { register, login, logout, refreshToken, me };

@@ -3,8 +3,8 @@ import { Schema, model, Types } from "mongoose";
 export interface IEmployerProfile {
   company_name: string;
   company_logo?: string;
-  description?: string;
-  industry?: string;
+  description: string;
+  industry: string;
   website?: string;
 }
 
@@ -13,11 +13,11 @@ export interface ICandidateSkill {
 }
 
 export interface ICandidateProfile {
-  headline?: string;
-  bio?: string;
+  headline: string;
+  bio: string;
   location?: string;
   portfolio_url?: string;
-  resume?: string;
+  resume: string;
   skills: ICandidateSkill[];
   experience_level: "entry" | "junior" | "mid" | "senior" | "lead";
 }
@@ -31,7 +31,9 @@ export interface IUser {
   role: UserRole;
   employerProfile?: IEmployerProfile;
   candidateProfile?: ICandidateProfile;
+  stripe_customer_id?: string;
   is_blocked: boolean;
+  deletedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -40,8 +42,8 @@ const EmployerProfileSchema = new Schema<IEmployerProfile>(
   {
     company_name: { type: String, required: true, trim: true },
     company_logo: String,
-    description: { type: String, trim: true, maxlength: 2000 },
-    industry: { type: String, trim: true },
+    description: { type: String, required: true, trim: true, maxlength: 2000 },
+    industry: { type: String, required: true, trim: true },
     website: { type: String, trim: true },
   },
   { _id: false },
@@ -60,11 +62,11 @@ const CandidateSkillSchema = new Schema<ICandidateSkill>(
 
 const CandidateProfileSchema = new Schema<ICandidateProfile>(
   {
-    headline: { type: String, trim: true },
-    bio: { type: String, trim: true, maxlength: 2000 },
+    headline: { type: String, trim: true, required: true },
+    bio: { type: String, trim: true, maxlength: 2000, required: true },
     location: { type: String, trim: true },
     portfolio_url: { type: String, trim: true },
-    resume: String,
+    resume: { type: String, required: true },
     skills: [CandidateSkillSchema],
     experience_level: {
       type: String,
@@ -104,6 +106,8 @@ const UserSchema = new Schema<IUser>(
       },
     },
     is_blocked: { type: Boolean, default: false },
+    stripe_customer_id: { type: String, unique: true, sparse: true },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true, versionKey: false },
 );

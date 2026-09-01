@@ -5,7 +5,9 @@ export type NotificationType =
   | "job_rejected"
   | "application_status_changed"
   | "payment_completed"
-  | "payment_failed";
+  | "payment_failed"
+  | "application_submitted"
+  | "subscription_updated";
 
 export interface INotification {
   user_id: Types.ObjectId;
@@ -35,6 +37,8 @@ const NotificationSchema = new Schema<INotification>(
         "application_status_changed",
         "payment_completed",
         "payment_failed",
+        "application_submitted",
+        "subscription_updated",
       ],
       required: true,
     },

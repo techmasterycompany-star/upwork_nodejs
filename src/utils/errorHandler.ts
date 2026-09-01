@@ -11,8 +11,6 @@ export default function errorHandler(
     return res
       .status(err.status)
       .json({ success: false, message: err.message });
-  console.error("Unexpected error:", err);
-  res.status(500).json({ success: false, message: "Internal Server Error" });
 
   console.error("Unexpected error:", err);
   try {
