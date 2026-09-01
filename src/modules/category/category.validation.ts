@@ -18,10 +18,14 @@ export const updateCategorySchema = z.object({
   params: z.object({
     id: objectIdSchema("id"),
   }),
-  body: z.object({
-    name: z.string().trim().min(1, "Category name is required").optional(),
-    description: z.string().trim().max(2000).optional(),
-  }),
+  body: z
+    .object({
+      name: z.string().trim().min(1, "Category name is required").optional(),
+      description: z.string().trim().max(2000).optional(),
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      message: "At least one field is required to update",
+    }),
 });
 
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>["body"];

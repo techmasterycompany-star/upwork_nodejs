@@ -1,14 +1,15 @@
 import { z } from "zod";
+import { objectIdSchema } from "../../utils/validation.utils.js";
 
 export const addToWishlistSchema = z.object({
   body: z.object({
-    job_id: z.string().min(1, "Job ID is required"),
+    job_id: objectIdSchema("job_id"),
   }),
 });
 
 export const wishlistIdSchema = z.object({
   params: z.object({
-    id: z.string().min(1, "Wishlist ID is required"),
+    id: objectIdSchema("id"),
   }),
 });
 
