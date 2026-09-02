@@ -66,7 +66,7 @@ const CandidateProfileSchema = new Schema<ICandidateProfile>(
     bio: { type: String, trim: true, maxlength: 2000, required: true },
     location: { type: String, trim: true },
     portfolio_url: { type: String, trim: true },
-    resume: { type: String, required: true },
+    resume: { type: String },
     skills: [CandidateSkillSchema],
     experience_level: {
       type: String,

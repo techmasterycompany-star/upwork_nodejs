@@ -5,6 +5,7 @@ import {
 } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import {
+  listCommentsByJob,
   createComment,
   updateComment,
   deleteComment,
@@ -25,6 +26,14 @@ import {
 const router = Router();
 
 // User routes
+router.get("/admin", authMiddleware, authorize("admin"), adminListComments);
+
+router.get(
+  "/:jobId",
+  authMiddleware,
+  validate(jobIdParamSchema),
+  listCommentsByJob,
+);
 
 router.post(
   "/:jobId",
@@ -58,8 +67,6 @@ router.post(
 );
 
 // Admin routes
-
-router.get("/admin", authMiddleware, authorize("admin"), adminListComments);
 
 router.patch(
   "/admin/:id/hide",
