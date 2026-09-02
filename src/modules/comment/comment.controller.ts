@@ -1,5 +1,18 @@
 import { Request, Response } from "express";
 import * as commentService from "./comment.service.js";
+import { success } from "zod";
+
+// list comments for a specific job
+export const listCommentsByJob = async (req: Request, res: Response) => {
+  const jobId = req.params.jobId as string;
+
+  const comments = await commentService.listCommentsByJob(jobId);
+
+  res.status(200).json({
+    success: true,
+    data: comments,
+  });
+};
 
 // create
 export const createComment = async (req: Request, res: Response) => {
@@ -56,7 +69,10 @@ export const deleteComment = async (req: Request, res: Response) => {
     });
   }
   await commentService.deleteComment(commentId, userId);
-  res.status(204).end();
+  res.status(200).json({
+    success: true,
+    message: "comment deleted successfully",
+  });
 };
 
 // reportComment
@@ -117,5 +133,8 @@ export const adminUnhideComment = async (req: Request, res: Response) => {
 export const adminRemoveComment = async (req: Request, res: Response) => {
   const commentId = req.params.id as string;
   await commentService.adminRemoveComment(commentId);
-  res.status(204).end();
+  res.status(200).json({
+    success: true,
+    message: "admin deleted the comment",
+  });
 };

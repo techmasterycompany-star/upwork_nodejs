@@ -35,6 +35,25 @@ export const createComment = async (
   return comment;
 };
 
+export const listCommentsByJob = async (jobId: string) => {
+  const job = await Job.findById(jobId);
+  if (!job) {
+    throw new AppError("Job not found", 404);
+  }
+
+  const comments = await Comment.find({
+    job_id: jobId,
+    deletedAt: null,
+    is_approved: true,
+  })
+    .select("-reports -is_approved -deletedAt -__v")
+    .populate("user_id", "name email")
+    .sort({ createdAt: -1 })
+    .lean();
+
+  return comments;
+};
+
 // update the comment
 export const updateComment = async (
   commentId: string,
