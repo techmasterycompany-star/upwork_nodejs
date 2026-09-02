@@ -1,11 +1,16 @@
-import { Request, Response, NextFunction } from 'express';
-import * as employerService from './employer.service.js';
-import AppError from '../../error/AppError.js';
+import { Request, Response, NextFunction } from "express";
+import * as employerService from "./employer.service.js";
+import AppError from "../../error/AppError.js";
+import { uploadBuffer } from "../../utils/cloudinary.js";
 
-export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+export const getProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
-    if (!userId) throw new AppError('User not authenticated', 401);
+    if (!userId) throw new AppError("User not authenticated", 401);
 
     const profile = await employerService.getEmployerProfile(userId);
     res.status(200).json({
@@ -17,10 +22,14 @@ export const getProfile = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
-    if (!userId) throw new AppError('User not authenticated', 401);
+    if (!userId) throw new AppError("User not authenticated", 401);
 
     const { companyName, description, industry, website } = req.body;
 
@@ -33,7 +42,7 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
 
     res.status(200).json({
       success: true,
-      message: 'Profile updated successfully',
+      message: "Profile updated successfully",
       data: updatedProfile,
     });
   } catch (error) {
@@ -41,23 +50,34 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const uploadLogo = async (req: Request, res: Response, next: NextFunction) => {
+export const uploadLogo = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const userId = req.user?.id;
-    if (!userId) throw new AppError('User not authenticated', 401);
+    if (!userId) throw new AppError("User not authenticated", 401);
 
     if (!req.file) {
-      throw new AppError('No logo file uploaded', 400);
+      throw new AppError("No logo file uploaded", 400);
     }
 
-    const filePath = `/uploads/${req.file.filename}`;
-    const updatedProfile = await employerService.updateEmployerLogo(userId, filePath);
+    const { url } = await uploadBuffer(req.file.buffer, {
+      folder: "job-board/logos",
+      resource_type: "image",
+    });
+
+    const updatedProfile = await employerService.updateEmployerLogo(
+      userId,
+      url,
+    );
 
     res.status(200).json({
       success: true,
-      message: 'Logo uploaded successfully',
+      message: "Logo uploaded successfully",
       data: {
-        logoUrl: filePath,
+        logoUrl: url,
         profile: updatedProfile,
       },
     });

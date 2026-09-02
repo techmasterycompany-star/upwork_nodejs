@@ -104,3 +104,28 @@ export const updateSkills = async (
 
   return updatedUser?.candidateProfile?.skills || [];
 };
+
+export const updateCandidateResume = async (
+  userId: string,
+  resumeUrl: string,
+) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError("User not found", 404);
+  if (user.role !== "candidate") throw new AppError("Not a candidate", 403);
+
+  const profile = user.candidateProfile ?? {
+    headline: "",
+    bio: "",
+    location: "",
+    portfolio_url: "",
+    resume: "",
+    skills: [],
+    experience_level: "entry" as const,
+  };
+
+  user.candidateProfile = profile;
+  user.candidateProfile.resume = resumeUrl;
+
+  await user.save();
+  return user.candidateProfile;
+};

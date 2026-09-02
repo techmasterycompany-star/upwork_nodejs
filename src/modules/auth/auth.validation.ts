@@ -7,8 +7,11 @@ const employerProfileBody = z
       .string({ error: "Company name is required" })
       .trim()
       .min(1, "Company name is required"),
-    company_logo: z.string().trim().optional(),
-    description: z.string().trim().max(2000, "Description cannot exceed 2000 characters").optional(),
+    description: z
+      .string()
+      .trim()
+      .max(2000, "Description cannot exceed 2000 characters")
+      .optional(),
     industry: z.string().trim().optional(),
     website: z.string().trim().optional(),
   })
@@ -23,10 +26,13 @@ const candidateSkillBody = z
 const candidateProfileBody = z
   .object({
     headline: z.string().trim().optional(),
-    bio: z.string().trim().max(2000, "Bio cannot exceed 2000 characters").optional(),
+    bio: z
+      .string()
+      .trim()
+      .max(2000, "Bio cannot exceed 2000 characters")
+      .optional(),
     location: z.string().trim().optional(),
     portfolio_url: z.string().trim().optional(),
-    resume: z.string().default(""),
     skills: z.array(candidateSkillBody).optional().default([]),
     experience_level: z
       .enum(["entry", "junior", "mid", "senior", "lead"])

@@ -137,7 +137,7 @@ export const closeJob = async (id: string, userId: Types.ObjectId) => {
   );
 
   if (!job) {
-    throw new AppError("Job not found", 404);
+    throw new AppError("Job not found or not approved", 404);
   }
   return job;
 };
