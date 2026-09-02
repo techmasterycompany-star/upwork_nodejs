@@ -17,7 +17,8 @@ export const processInvoicePaid = async (
 ): Promise<void> => {
   const invoice = event.data.object as any;
   const stripeCustomer = invoice.customer as string;
-  const stripeSubscription = invoice.subscription as string;
+  const stripeSubscription = (invoice.subscription ??
+    invoice.parent?.subscription_details?.subscription) as string;
   const invoiceId = invoice.id;
   const amountPaid = invoice.amount_paid;
   const currency = invoice.currency;
@@ -124,7 +125,8 @@ export const processInvoicePaymentFailed = async (
 ): Promise<void> => {
   const invoice = event.data.object as any;
   const stripeCustomer = invoice.customer as string;
-  const stripeSubscription = invoice.subscription as string;
+  const stripeSubscription = (invoice.subscription ??
+    invoice.parent?.subscription_details?.subscription) as string;
   const invoiceId = invoice.id;
   const amountDue = invoice.amount_due || invoice.amount_paid || 0;
   const currency = invoice.currency;
